@@ -6,19 +6,13 @@ import requests
 import sys
 import tempfile
 
-from helpers import angel
-
-import pprint
-
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 
-
-def pp(x):
-    pprint.PrettyPrinter(indent=4).pprint(x)
+from helpers import angel
 
 
 def p(s):
