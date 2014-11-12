@@ -174,8 +174,9 @@ def main():
     startups_list = startups_dict.keys()
     startups_list.sort(key=relevance_for_context(context))
     relevant_startups = reversed(startups_list[len(startups_list) - 10:])
-    for startup_id in relevant_startups:
+    for i, startup_id in enumerate(relevant_startups):
         startup = startups_dict[startup_id]
+        print "%d." % (i + 1),
         print_startup(startup)
 
 
