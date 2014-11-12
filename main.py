@@ -32,6 +32,15 @@ def get_location_id_by_name(location_name):
     return response.json()[0]['id']
 
 
+def get_market_id_by_name(market_name):
+    data = {
+        'query': market_name,
+        'type': 'MarketTag',
+    }
+    response = requests.get(SEARCH.format(**data))
+    return response.json()[0]['id']
+
+
 def get_startups_by_tag(tag_id):
     '''Returns up to 50 startups that match a location or market tag.'''
     data = {
@@ -48,6 +57,12 @@ def get_startups_by_location(location_name):
     return startups
 
 
+def get_startups_by_market(market_name):
+    market_id = get_market_id_by_name(market_name)
+    startups = get_startups_by_tag(market_id)
+    return startups
+
+
 def main():
     candidate = json.load(sys.stdin)
     matches = defaultdict(lambda: 0)
@@ -57,6 +72,10 @@ def main():
         for startup in startups:
             matches[startup.id] += 1
             startups_dict[startup.id] = startup
+    for market in candidate['marketPreferences']:
+        startups = get_startups_by_market(market)
+        for startup in startups:
+            matches[startup] += 1
     pp(matches)
 
 if __name__ == '__main__':
