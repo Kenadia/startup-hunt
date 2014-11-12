@@ -34,9 +34,13 @@ def print_startup(startup):
 
 def get_dictionary():
     d = {}
-    with open('/usr/share/dict/words') as f:
-        for line in f:
-            d[line.strip().lower()] = True
+    try:
+        with open('/usr/share/dict/words') as f:
+            for line in f:
+                d[line.strip().lower()] = True
+    except IOError:
+        print 'Warning: dictionary not found. This will cause extracting' +\
+              ' useful information from a resume to take longer.'
     return d
 
 
@@ -78,7 +82,6 @@ def main():
                         type=str, nargs='?',
                         help='path to a JSON file containing candidate info')
     args = parser.parse_args()
-    dictionary = get_dictionary()
 
     # Load candidate info from a JSON file if given, else from standard input
     if args.input_file:
@@ -109,6 +112,7 @@ def main():
                     matches[startup.id] += 1
                     startups_dict[startup.id] = startup
     if 'resume' in candidate:
+        dictionary = get_dictionary()
         pdf_startup_ids = list()
         with pdf.get_pdf_file(candidate['resume']) as pdf_file:
             pdf_text = pdf.pdf_to_text(pdf_file)
