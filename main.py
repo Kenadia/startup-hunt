@@ -3,6 +3,8 @@ import json
 import requests
 import sys
 
+from startup import Startup
+
 import pprint
 
 
@@ -17,7 +19,7 @@ def pp(x):
 
 
 def json_to_startups(startups_json):
-    return startups_json
+    return [Startup(x) for x in startups_json if not x['hidden']]
 
 
 def get_location_id_by_name(location_name):
@@ -49,7 +51,7 @@ def main():
     # candidate = json.loads(sys.stdin)
     # companies = ['Lob']
     # print companies
-    pp(get_startups_by_location('San Francisco'))
+    pp(map(lambda x: x.name, get_startups_by_location('San Francisco')))
 
 if __name__ == '__main__':
     main()
