@@ -1,4 +1,5 @@
 #!/usr/bin/python2.7
+from collections import defaultdict
 import json
 import requests
 import sys
@@ -48,10 +49,15 @@ def get_startups_by_location(location_name):
 
 
 def main():
-    # candidate = json.loads(sys.stdin)
-    # companies = ['Lob']
-    # print companies
-    pp(map(lambda x: x.name, get_startups_by_location('San Francisco')))
+    candidate = json.load(sys.stdin)
+    matches = defaultdict(lambda: 0)
+    startups_dict = dict()
+    for location in candidate['locationPreferences']:
+        startups = get_startups_by_location(location)
+        for startup in startups:
+            matches[startup.id] += 1
+            startups_dict[startup.id] = startup
+    pp(matches)
 
 if __name__ == '__main__':
     main()
