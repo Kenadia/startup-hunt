@@ -23,6 +23,7 @@ def get_pdf_file(path):
 
 
 def pdf_to_text(pdf_file):
+    '''Given a file pointer to a PDF, returns the text it contains.'''
     with tempfile.SpooledTemporaryFile() as pdf_out:
         resource_manager = PDFResourceManager()
         converter = TextConverter(resource_manager, pdf_out,

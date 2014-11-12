@@ -1,4 +1,7 @@
 #!/usr/bin/python2.7
+#
+# Author: Ken Schiller
+
 from collections import defaultdict
 import argparse
 import json
@@ -14,6 +17,7 @@ def p(s):
 
 
 def relevance_for_context(context):
+    '''Given matched companies, returns a fn to rate a company's relevance.'''
     matches, startups_dict = context
 
     def relevance(startup_id):
@@ -26,16 +30,18 @@ def relevance_for_context(context):
 
 
 def print_startup(startup):
+    '''Print a few lines of information about a startup.'''
     print startup.name
     print '\tQuality: %d' % startup.quality
     print '\tLocation(s): %s' % ', '.join(map(str, startup.locations))
     print '\tMarket(s): %s' % ', '.join(map(str, startup.markets))
 
 
-def get_dictionary():
+def get_dictionary(path='/usr/share/dict/words'):
+    '''Reads words (by default, the built-in dictionary) into a Python dict.'''
     d = {}
     try:
-        with open('/usr/share/dict/words') as f:
+        with open(path) as f:
             for line in f:
                 d[line.strip().lower()] = True
     except IOError:
@@ -44,7 +50,8 @@ def get_dictionary():
     return d
 
 
-def get_potential_company_names(s, dictionary={}):
+def get_proper_nouns(s, dictionary={}):
+    '''Find proper nouns in a string, given a dictionary of common words.'''
     def is_capitalized(word):
         return word[0].isupper() and not word.isupper()
 
@@ -116,7 +123,7 @@ def main():
         pdf_startup_ids = list()
         with pdf.get_pdf_file(candidate['resume']) as pdf_file:
             pdf_text = pdf.pdf_to_text(pdf_file)
-            names = get_potential_company_names(pdf_text, dictionary)
+            names = get_proper_nouns(pdf_text, dictionary)
             for name in names:
                 p('.')
                 startups = angel.get_startups_by_name(name)
