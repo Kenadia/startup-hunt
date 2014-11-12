@@ -32,12 +32,15 @@ def get_market_id_by_name(market_name):
 
 def get_startups_by_tag(tag_id):
     '''Returns up to 50 startups that match a location or market tag.'''
-    data = {
-        'tag_id': tag_id,
-    }
-    response = requests.get(STARTUPS_BY_TAG.format(**data))
-    startups_json = response.json()['startups']
-    return json_to_startups(startups_json)
+    try:
+        data = {
+            'tag_id': tag_id,
+        }
+        response = requests.get(STARTUPS_BY_TAG.format(**data))
+        startups_json = response.json()['startups']
+        return json_to_startups(startups_json)
+    except Exception as e:
+        print '\nError accessing AngelList API:', e
 
 
 def get_startups_by_location(location_name):
@@ -54,5 +57,28 @@ def get_startups_by_market(market_name):
         market_id = get_market_id_by_name(market_name)
         startups = get_startups_by_tag(market_id)
         return startups
+    except Exception as e:
+        print '\nError accessing AngelList API:', e
+
+
+def get_startups_by_name(name):
+    try:
+        data = {
+            'query': name,
+            'type': 'Startup',
+        }
+        response = requests.get(SEARCH.format(**data))
+        return response.json()
+    except Exception as e:
+        print '\nError accessing AngelList API:', e
+
+
+def get_startup_by_id(id):
+    try:
+        data = {
+            'startup_id': id,
+        }
+        response = requests.get(STARTUPS_BY_ID.format(**data))
+        return Startup(response.json())
     except Exception as e:
         print '\nError accessing AngelList API:', e

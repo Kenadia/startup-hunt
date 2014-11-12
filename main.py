@@ -27,7 +27,7 @@ def p(s):
 
 
 def relevance_for_context(context):
-    candidate, matches, startups_dict = context
+    matches, startups_dict = context
 
     def relevance(startup_id):
         startup = startups_dict[startup_id]
@@ -73,6 +73,45 @@ def resume_to_text(resume_file):
         return resume_out.read()
 
 
+def get_dictionary():
+    d = {}
+    with open('/usr/share/dict/words') as f:
+        for line in f:
+            d[line.strip().lower()] = True
+    return d
+
+
+def get_potential_company_names(s, dictionary={}):
+    def is_capitalized(word):
+        return word[0].isupper() and not word.isupper()
+
+    def not_common_word(word):
+        w = word.lower()
+        if len(w.split()) > 1:
+            return True
+        if w in dictionary:
+            return False
+        if w[-1] == 's' and w[:len(w) - 1] in dictionary:
+            return False
+        return True
+
+    names = []
+    words = s.split()
+    i = 0
+    while i < len(words):
+        word = words[i]
+        name = []
+        while is_capitalized(word) and i < len(words):
+            name.append(word)
+            i += 1
+            word = words[i]
+        if name:
+            name = ' '.join(name)
+            names.append(name)
+        i += 1
+    return filter(not_common_word, names)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Find startups relevant to a given candidate.')
@@ -80,6 +119,7 @@ def main():
                         type=str, nargs='?',
                         help='path to a JSON file containing candidate info')
     args = parser.parse_args()
+    dictionary = get_dictionary()
 
     # Load candidate info from a JSON file if given, else from standard input
     if args.input_file:
@@ -90,7 +130,7 @@ def main():
 
     matches = defaultdict(lambda: 0)
     startups_dict = dict()
-    context = candidate, matches, startups_dict
+    context = matches, startups_dict
 
     # Search for startups according to candidate info
     if 'locationPreferences' in candidate:
@@ -110,10 +150,24 @@ def main():
                     matches[startup.id] += 1
                     startups_dict[startup.id] = startup
     if 'resume' in candidate:
+        resume_startup_ids = list()
         with get_resume_file(candidate['resume']) as resume_file:
             resume_text = resume_to_text(resume_file)
-            print resume_text
-
+            names = get_potential_company_names(resume_text, dictionary)
+            for name in names:
+                p('.')
+                startups = angel.get_startups_by_name(name)
+                if startups and startups[0]['name'].lower() == name.lower():
+                    resume_startup_ids.append(startups[0]['id'])
+        for resume_startup_id in resume_startup_ids:
+            resume_startup = angel.get_startup_by_id(resume_startup_id)
+            for market in resume_startup.markets:
+                p('.')
+                startups = angel.get_startups_by_tag(market.id)
+                if startups:
+                    for startup in startups:
+                        matches[startup.id] += 1
+                        startups_dict[startup.id] = startup
     print
 
     # Determine ranking of startups by relevance
