@@ -9,25 +9,34 @@ STARTUPS_BY_TAG = BASE_URL + 'tags/{tag_id}/startups'
 
 
 def json_to_startups(startups_json):
+    '''Converts a JSON response from AngelList to a Startup object.'''
     return [Startup(x) for x in startups_json if not x['hidden']]
 
 
 def get_location_id_by_name(location_name):
-    data = {
-        'query': location_name,
-        'type': 'LocationTag',
-    }
-    response = requests.get(SEARCH.format(**data))
-    return response.json()[0]['id']
+    '''Returns the AngelList tag id for a location.'''
+    try:
+        data = {
+            'query': location_name,
+            'type': 'LocationTag',
+        }
+        response = requests.get(SEARCH.format(**data))
+        return response.json()[0]['id']
+    except Exception as e:
+        print '\nError accessing AngelList API:', e
 
 
 def get_market_id_by_name(market_name):
-    data = {
-        'query': market_name,
-        'type': 'MarketTag',
-    }
-    response = requests.get(SEARCH.format(**data))
-    return response.json()[0]['id']
+    '''Returns the AngelList tag id for a market.'''
+    try:
+        data = {
+            'query': market_name,
+            'type': 'MarketTag',
+        }
+        response = requests.get(SEARCH.format(**data))
+        return response.json()[0]['id']
+    except Exception as e:
+        print '\nError accessing AngelList API:', e
 
 
 def get_startups_by_tag(tag_id):
@@ -44,6 +53,7 @@ def get_startups_by_tag(tag_id):
 
 
 def get_startups_by_location(location_name):
+    '''Returns up to 50 startups that match a location name.'''
     try:
         location_id = get_location_id_by_name(location_name)
         startups = get_startups_by_tag(location_id)
@@ -53,6 +63,7 @@ def get_startups_by_location(location_name):
 
 
 def get_startups_by_market(market_name):
+    '''Returns up to 50 startups that match a market name.'''
     try:
         market_id = get_market_id_by_name(market_name)
         startups = get_startups_by_tag(market_id)
@@ -62,6 +73,7 @@ def get_startups_by_market(market_name):
 
 
 def get_startups_by_name(name):
+    '''Returns data on a startup, given its name.'''
     try:
         data = {
             'query': name,
@@ -74,6 +86,7 @@ def get_startups_by_name(name):
 
 
 def get_startup_by_id(id):
+    '''Returns data on a startup, given its AngelList id.'''
     try:
         data = {
             'startup_id': id,
