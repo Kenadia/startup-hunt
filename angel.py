@@ -41,12 +41,18 @@ def get_startups_by_tag(tag_id):
 
 
 def get_startups_by_location(location_name):
-    location_id = get_location_id_by_name(location_name)
-    startups = get_startups_by_tag(location_id)
-    return startups
+    try:
+        location_id = get_location_id_by_name(location_name)
+        startups = get_startups_by_tag(location_id)
+        return startups
+    except Exception as e:
+        print '\nError accessing AngelList API:', e
 
 
 def get_startups_by_market(market_name):
-    market_id = get_market_id_by_name(market_name)
-    startups = get_startups_by_tag(market_id)
-    return startups
+    try:
+        market_id = get_market_id_by_name(market_name)
+        startups = get_startups_by_tag(market_id)
+        return startups
+    except Exception as e:
+        print '\nError accessing AngelList API:', e

@@ -47,16 +47,18 @@ def main():
         for location in candidate['locationPreferences']:
             p('.')
             startups = angel.get_startups_by_location(location)
-            for startup in startups:
-                matches[startup.id] += 1
-                startups_dict[startup.id] = startup
+            if startups:
+                for startup in startups:
+                    matches[startup.id] += 1
+                    startups_dict[startup.id] = startup
     if 'marketPreferences' in candidate:
         for market in candidate['marketPreferences']:
             p('.')
             startups = angel.get_startups_by_market(market)
-            for startup in startups:
-                matches[startup.id] += 1
-                startups_dict[startup.id] = startup
+            if startups:
+                for startup in startups:
+                    matches[startup.id] += 1
+                    startups_dict[startup.id] = startup
     print
 
     # Determine ranking of startups by relevance
