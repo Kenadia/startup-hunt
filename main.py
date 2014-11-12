@@ -45,6 +45,34 @@ def print_startup(startup):
     print '\tMarket(s): %s' % ', '.join(map(str, startup.markets))
 
 
+def get_resume_file(path):
+    '''Downloads file if path is an HTTP address. Returns a file pointer.'''
+    if path.startswith('http'):
+        fp = tempfile.SpooledTemporaryFile()
+        response = requests.get(path, stream=True)
+        if response.ok:
+            for block in response.iter_content(1024):
+                if not block:
+                    break
+                fp.write(block)
+        fp.seek(0)
+        return fp
+    return open(path)
+
+
+def resume_to_text(resume_file):
+    with tempfile.SpooledTemporaryFile() as resume_out:
+        resource_manager = PDFResourceManager()
+        converter = TextConverter(resource_manager, resume_out,
+                                  codec='utf-8', laparams=LAParams())
+        interpreter = PDFPageInterpreter(resource_manager, converter)
+        for page in PDFPage.get_pages(resume_file):
+            interpreter.process_page(page)
+        converter.close()
+        resume_out.seek(0)
+        return resume_out.read()
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Find startups relevant to a given candidate.')
@@ -82,24 +110,10 @@ def main():
                     matches[startup.id] += 1
                     startups_dict[startup.id] = startup
     if 'resume' in candidate:
-        # fp = open(candidate['resume'])
-        with tempfile.SpooledTemporaryFile() as fp:
-        # with open('output.pdf', 'wb') as fp:
-            response = requests.get(candidate['resume'], stream=True)
-            if response.ok:
-                for block in response.iter_content(1024):
-                    if not block:
-                        break
-                    fp.write(block)
-            fp.seek(0)
-            resource_manager = PDFResourceManager()
-            converter = TextConverter(resource_manager, sys.stdout,
-                                      codec='utf-8', laparams=LAParams())
-            interpreter = PDFPageInterpreter(resource_manager, converter)
-            for page in PDFPage.get_pages(fp):
-                interpreter.process_page(page)
-            fp.close()
-            converter.close()
+        with get_resume_file(candidate['resume']) as resume_file:
+            resume_text = resume_to_text(resume_file)
+            print resume_text
+
     print
 
     # Determine ranking of startups by relevance
