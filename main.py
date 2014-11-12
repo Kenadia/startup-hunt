@@ -1,5 +1,6 @@
 #!/usr/bin/python2.7
 from collections import defaultdict
+import argparse
 import json
 import sys
 
@@ -37,7 +38,20 @@ def print_startup(startup):
 
 
 def main():
-    candidate = json.load(sys.stdin)
+    parser = argparse.ArgumentParser(
+        description='Find startups relevant to a given candidate.')
+    parser.add_argument('input_file', metavar='candidate_json',
+                        type=str, nargs='?',
+                        help='path to a JSON file containing candidate info')
+    args = parser.parse_args()
+
+    # Load candidate info from a JSON file if given, else from standard input
+    if args.input_file:
+        with open(args.input_file) as f:
+            candidate = json.load(f)
+    else:
+        candidate = json.load(sys.stdin)
+
     matches = defaultdict(lambda: 0)
     startups_dict = dict()
     context = candidate, matches, startups_dict
