@@ -6,7 +6,7 @@ import requests
 import sys
 import tempfile
 
-import angel
+from helpers import angel
 
 import pprint
 
