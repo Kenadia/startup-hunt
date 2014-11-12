@@ -8,6 +8,12 @@ import angel
 
 import pprint
 
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfinterp import PDFResourceManager
+from pdfminer.pdfinterp import PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+
 
 def pp(x):
     pprint.PrettyPrinter(indent=4).pprint(x)
@@ -73,6 +79,16 @@ def main():
                 for startup in startups:
                     matches[startup.id] += 1
                     startups_dict[startup.id] = startup
+    if 'resume' in candidate:
+        fp = open(candidate['resume'])
+        resource_manager = PDFResourceManager()
+        converter = TextConverter(resource_manager, sys.stdout,
+                                  codec='utf-8', laparams=LAParams())
+        interpreter = PDFPageInterpreter(resource_manager, converter)
+        for page in PDFPage.get_pages(fp):
+            interpreter.process_page(page)
+        fp.close()
+        converter.close()
     print
 
     # Determine ranking of startups by relevance
