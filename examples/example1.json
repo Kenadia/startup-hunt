@@ -1,0 +1,4 @@
+{
+  "locationPreferences": ["San Francisco", "Portland", "New York"],
+  "marketPreferences": ["Analytics", "Cloud Infrastructure", "Developer APIs", "Education"]
+}
